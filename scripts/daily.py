@@ -2,7 +2,7 @@
 키는 환경변수 DATA_GO_KR_KEY 로만 받는다."""
 import os, sys, json, time, re, csv, datetime as dt, urllib.request, statistics, pathlib
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-K = os.environ["DATA_GO_KR_KEY"]
+K = os.environ["DATA_GO_KR_KEY"].strip()
 PRICE = "https://apis.data.go.kr/1160100/GetBondSecuritiesInfoService_V2/getBondPriceInfo_V2"
 BASIC = "https://apis.data.go.kr/1160100/GetBondIssuInfoService_V2/getBondBasiInfo_V2"
 SCALE = ['AAA','AA+','AA','AA-','A+','A','A-','BBB+','BBB','BBB-','BB+','BB','BB-','B+','B','B-']
