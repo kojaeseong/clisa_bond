@@ -1,0 +1,23 @@
+name: daily-update
+on:
+  schedule:
+    - cron: "40 23 * * 0-4"   # 평일 08:40 KST (전날 거래분)
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: python scripts/daily.py
+        env:
+          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+      - run: |
+          git config user.name "clisa-bot"
+          git config user.email "clisageo@clisa.ai"
+          git add docs data/missing_issuers.txt
+          git diff --cached --quiet || git commit -m "자료 갱신 $(date -u +%Y-%m-%d)"
+          git push

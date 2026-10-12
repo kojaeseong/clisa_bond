@@ -1,0 +1,4 @@
+*.key
+.env
+data/price_*.json
+data/basic_*.json

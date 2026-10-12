@@ -1,0 +1,137 @@
+<title>우량채권 찾기</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* 레이아웃: 머리띠(흑연색) → 조건 선택 한 줄 → 목록(왼쪽)·상세(오른쪽). 흰 바탕, 선 위주, 색은 남색·청록 2가지와 보라(유의) 1가지만. */
+:root{
+  --bg:#FFFFFF; --bar:#1E2226; --barfg:#FFFFFF; --fg:#17191C; --muted:#636B74; --line:#DADEE3; --soft:#F2F4F6;
+  --accent:#0E7C5B; --teal:#0E7C5B; --alert:#6A3FB5;
+  --sans:"Noto Sans KR",system-ui,sans-serif; --mono:"IBM Plex Mono","Noto Sans KR",monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --bg:#121416; --bar:#0B0C0E; --barfg:#ECEEF0; --fg:#ECEEF0; --muted:#9CA3AB; --line:#2E3338; --soft:#1B1E22; --accent:#5CC9A1; --teal:#5CC9A1; --alert:#B99BF0; color-scheme:dark } }
+:root[data-theme="dark"]{ --bg:#121416; --bar:#0B0C0E; --barfg:#ECEEF0; --fg:#ECEEF0; --muted:#9CA3AB; --line:#2E3338; --soft:#1B1E22; --accent:#5CC9A1; --teal:#5CC9A1; --alert:#B99BF0; color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:14px;line-height:1.55;margin:0}
+.bar{background:var(--bar);color:var(--barfg)}
+.bar .in{max-width:1240px;margin:0 auto;padding:14px 16px;display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline}
+.bar .name{font-weight:700;font-size:17px;letter-spacing:.02em}
+.bar .date{font-family:var(--mono);font-size:13px;opacity:.85}
+.bar .what{font-size:13px;opacity:.85;flex-basis:100%}
+.bar .btns{margin-left:auto;display:flex;flex-wrap:wrap;gap:6px}
+.bar a.go{color:var(--barfg);font-size:13px;text-decoration:none;border:1px solid rgba(255,255,255,.45);padding:3px 10px;border-radius:3px}
+.note h4{scroll-margin-top:12px}
+.bar a.go:hover{background:rgba(255,255,255,.12)}
+.brief{display:flex;flex-wrap:wrap;gap:4px 18px;padding:8px 0;font-size:12px;color:var(--muted);border-bottom:1px solid var(--line)}
+.brief a{color:var(--teal);text-decoration:none}
+.wrap{max-width:1240px;margin:0 auto;padding-block:16px 40px;padding-inline:16px}
+.pick{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px 14px;padding:12px 0;border-bottom:1px solid var(--line)}
+.pick label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
+.pick select{font:inherit;font-size:14px;color:var(--fg);padding:7px 8px;border:1px solid var(--line);border-radius:3px;background:var(--bg)}
+.sum{display:flex;flex-wrap:wrap;gap:6px 22px;padding:10px 0;font-size:13px;color:var(--muted)}
+.sum b{color:var(--fg);font-family:var(--mono);font-size:15px}
+.split{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:18px;align-items:start}
+@media (max-width:920px){.split{grid-template-columns:1fr}}
+.tbl{overflow-x:auto;border-top:2px solid var(--fg)}
+table{border-collapse:collapse;width:100%;font-size:13px;min-width:760px}
+th,td{padding:8px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono)}
+th{font-size:12px;color:var(--muted);font-weight:500}
+tbody tr{cursor:pointer} tbody tr:hover,tbody tr.on{background:var(--soft)}
+.r{font-family:var(--mono);font-weight:500}
+.tag{font-size:11px;color:var(--muted)} .tag.alert{color:var(--alert);font-weight:500}
+.detail{position:sticky;top:env(safe-area-inset-top,0px);border-top:2px solid var(--fg);padding-top:10px}
+.detail h3{margin:0 0 2px;font-size:16px;line-height:1.35} .detail .sub{color:var(--muted);font-size:12px;margin-bottom:12px}
+.kv{display:grid;grid-template-columns:92px 1fr;gap:5px 10px;font-size:13px} .kv div:nth-child(odd){color:var(--muted)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.blk{margin-top:14px;padding-top:10px;border-top:1px solid var(--line);font-size:13px}
+.blk h4{margin:0 0 4px;font-size:12px;color:var(--muted);font-weight:500;letter-spacing:.04em}
+.blk.alert h4{color:var(--alert)} .blk.alert{border-top-color:var(--alert)}
+.blk ol{margin:4px 0 0 18px;padding:0} .blk li{margin:2px 0}
+.links a{color:var(--teal);text-decoration:none;margin-right:14px} .links a:hover{text-decoration:underline}
+button.copy{font:inherit;font-size:11px;padding:1px 7px;border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:3px;cursor:pointer;margin-left:6px}
+button.copy:focus-visible,tbody tr:focus-visible,select:focus-visible{outline:2px solid var(--teal);outline-offset:1px}
+.note{margin-top:26px;border-top:1px solid var(--line);padding-top:12px;font-size:12px;color:var(--muted);line-height:1.7;max-width:90ch}
+.note h4{margin:8px 0 2px;font-size:12px;color:var(--fg)}
+.empty{color:var(--muted);font-size:13px}
+</style>
+<div class="bar"><div class="in">
+  <span class="name">우량채권 찾기</span><span class="date" id="basdt"></span><span class="btns"><a class="go" href="#tax">세금 계산 방법</a><a class="go" href="#caution">유의 사항</a><a class="go" href="#source">자료 출처</a></span>
+  <span class="what">거래소에서 최근 5영업일 안에 실제로 거래된 공모 채권을 신용등급과 세후 수익률로 골라 보는 표입니다. 어느 증권사 앱에서든 종목코드로 살 수 있는 채권만 담았습니다.</span>
+</div></div>
+<div class="wrap">
+
+<div class="pick">
+  <label>신용등급 <select id="fR"><option value="1">AAA 이상</option><option value="3">AA 이상 (AA- 포함)</option><option value="7" selected>A 이상 (A- 포함)</option><option value="99">전체</option></select></label>
+  <label>세후 수익률 <select id="fY"><option value="0">전체</option><option value="3">3% 이상</option><option value="4" selected>4% 이상</option><option value="5">5% 이상</option></select></label>
+  <label>남은 기간 <select id="fT"><option value="">전체</option><option value="1">1년 이내</option><option value="3">3년 이내</option><option value="5">5년 이내</option><option value="10">10년 이내</option><option value="fixed">만기 있는 것만</option></select></label>
+  <label>종류 <select id="fC"><option value="">전체</option><option>국채</option><option>지방채</option><option>특수채</option><option>금융채</option><option>일반회사채</option><option>후순위채</option><option>신종·조건부자본증권</option></select></label>
+  <label>거래일 <select id="fD"><option value="1">최근 거래일만</option><option value="5" selected>최근 5영업일</option></select></label>
+  <label>정렬 <select id="fS"><option value="after_tax">세후 수익률 높은 순</option><option value="ytm">세전 수익률 높은 순</option><option value="years">남은 기간 짧은 순</option><option value="volume">거래량 많은 순</option></select></label>
+</div>
+<div class="sum" id="sum"></div>
+
+<div class="split">
+  <div class="tbl"><table>
+    <thead><tr><th>등급</th><th>종목</th><th>종류</th><th class="n">세후 수익률</th><th class="n">세전</th><th class="n">표면금리</th><th>원금 받는 날</th><th class="n">남은 기간</th><th>이자 지급</th><th>거래일</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table></div>
+  <aside class="detail" id="detail"><p class="empty">목록의 종목을 누르면 상세 정보와 매수 방법이 여기에 나옵니다.</p></aside>
+</div>
+
+<div class="note" id="note">
+  <h4 id="tax">세금 계산 방법</h4>
+  증권사 화면의 수익률은 세전입니다. 이 표의 세후 수익률은 <span class="mono">세전 수익률 − 표면금리 × 15.4%</span>로 계산한 근사치입니다. 개인은 채권의 이자(표면금리 부분)에만 15.4%의 세금이 붙고 매매차익은 과세되지 않는다는 점을 반영했습니다. 그래서 같은 세전 수익률이면 표면금리가 낮은 채권이 세후로는 유리합니다. 다만 보유 기간에 따른 이자 계산, 금융소득종합과세(연 2천만 원 초과), 복리채의 과세 방식 등은 반영하지 않았으므로 실제 세후 수익과 다를 수 있습니다.
+  <h4 id="caution">유의 사항</h4>
+  채권은 예금자 보호 대상이 아니며, 발행사가 부도나면 원금을 잃을 수 있습니다. 만기 전에 팔면 그때의 시장 가격에 따라 손실이 날 수 있고, 장내 거래량이 적은 종목은 원하는 때에 팔지 못할 수 있습니다. 후순위채와 신종·조건부자본증권(표에서 보라색으로 표시)은 발행사의 재무 상태가 나빠지면 이자가 지급되지 않거나 원금이 줄어드는 조건이 붙어 있고, 만기보다 발행사의 조기상환(콜) 시점이 실제 회수 시점이 되는 경우가 많습니다. 이런 종목은 매수 전에 투자설명서의 조건을 읽어야 합니다. 이 표의 수익률은 거래된 날의 종가 기준이며 지금 호가와 다를 수 있습니다.
+  <h4 id="rating">신용등급</h4>
+  신용등급은 한국신용평가·한국기업평가·NICE신용평가의 공시 등급(2026년 10월 12일 확인)입니다. 국채·지방채·공공기관채는 국가 신용에 따릅니다. 후순위채와 신종·조건부자본증권은 평가사가 매긴 발행물 등급을 썼고, 발행물 등급이 공시되지 않은 종목은 발행사 등급보다 각각 1단계·2단계 낮춰 추정해 표시했습니다(종목 상세에 '추정'으로 표시). 등급표는 매달 평가사 공시와 다시 맞추며, 종목의 정확한 등급은 각 신용평가사 공시에서 확인할 수 있습니다.
+  <h4 id="source">자료 출처</h4>
+  금융위원회 채권시세정보·채권기본정보(공공데이터포털, 공공누리 제4유형: 출처 표시·비영리·변경 금지). 종목명·가격·수익률·만기·표면금리는 원자료 그대로이며, 세후 수익률·남은 기간·등급 보정은 클리사 계산입니다. 이 페이지는 정보 제공이며 투자 권유가 아닙니다. 어떤 대가도 받지 않습니다.
+</div>
+</div>
+<script src="data.js"></script>
+<script>
+const X=['국채','AAA','AA+','AA','AA-','A+','A','A-','BBB+','BBB','BBB-','BB+','BB','BB-','B+','B','B-'];
+const today=new Date(+BASDT.slice(0,4),+BASDT.slice(4,6)-1,+BASDT.slice(6));
+const d8=s=>s&&s.length===8?`${s.slice(0,4)}.${s.slice(4,6)}.${s.slice(6)}`:'';
+const toDate=s=>new Date(+s.slice(0,4),+s.slice(4,6)-1,+s.slice(6));
+const fmt=d=>d?`${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`:'';
+const won=n=>n.toLocaleString('ko-KR');
+function left(r){ if(r.perp) return '영구'; const y=Math.floor(r.years), m=Math.round((r.years-y)*12); return (y?y+'년 ':'')+(m?m+'개월':'')||'1개월 미만'; }
+function cycleMonths(r){ const m=(r.int_cycle||'').match(/(\d+)/); return m?+m[1]:0; }
+function nextCoupon(r){ if(r.int_type!=='이표채'||r.perp) return null; const n=cycleMonths(r); if(!n) return null; let d=toDate(r.maturity); while(true){ const p=new Date(d); p.setMonth(p.getMonth()-n); if(p<=today) break; d=p; } return d; }
+function callDate(r){ if(!(r.cls==='신종·조건부자본증권'||r.cls==='후순위채')) return null; const d=toDate(r.issue_dt); d.setFullYear(d.getFullYear()+5); return d; }
+const hybrid=r=>r.cls==='신종·조건부자본증권'||r.cls==='후순위채';
+document.getElementById('basdt').textContent=d8(BASDT)+' 거래 기준';
+const $=id=>document.getElementById(id); let cur=-1;
+function render(){ const R=+$('fR').value,Y=+$('fY').value,T=$('fT').value,Cc=$('fC').value,S=$('fS').value,Dd=$('fD').value;
+ let rows=DATA.map((r,i)=>({...r,i})).filter(r=>(Dd==='5'||r.trade_dt===BASDT)&&X.indexOf(r.rating)<=R&&r.after_tax>=Y&&(!Cc||r.cls===Cc)&&(!T||(T==='fixed'?!r.perp:(!r.perp&&r.years<=+T))));
+ rows.sort((a,b)=>S==='years'?(a.perp?99:a.years)-(b.perp?99:b.years):b[S]-a[S]);
+ const hy=rows.filter(hybrid).length;
+ $('sum').innerHTML=`<span>조건에 맞는 종목 <b>${rows.length}</b></span><span>${Dd==='5'?'최근 5영업일 거래 종목':'최근 거래일 거래 종목'} <b>${Dd==='5'?DATA.length:DATA.filter(r=>r.trade_dt===BASDT).length}</b></span><span>국고채 2~4년 세전 <b>${KTB.toFixed(2)}%</b></span>`+(hy?`<span>이 중 후순위·신종 <b>${hy}</b> (유의 사항 확인)</span>`:'');
+ $('rows').innerHTML=rows.length?rows.map(r=>`<tr data-i="${r.i}" tabindex="0" class="${r.i===cur?'on':''}"><td><span class="r">${r.rating}</span></td><td>${r.name}</td><td><span class="tag ${hybrid(r)?'alert':''}">${r.cls}</span></td><td class="n"><b>${r.after_tax.toFixed(2)}%</b></td><td class="n">${r.ytm.toFixed(2)}%</td><td class="n">${r.coupon.toFixed(2)}%</td><td>${r.perp?'영구(콜)':d8(r.maturity)}</td><td class="n">${left(r)}</td><td>${r.int_type==='이표채'?r.int_cycle+'마다':r.int_type||'-'}</td><td class="mono">${d8(r.trade_dt).slice(5)}</td></tr>`).join(''):`<tr><td colspan="10" class="empty">조건에 맞는 종목이 없습니다. 등급이나 수익률 조건을 넓혀 보십시오.</td></tr>`;
+}
+['fR','fY','fT','fC','fS','fD'].forEach(id=>$(id).addEventListener('change',render));
+$('rows').addEventListener('click',e=>{const t=e.target.closest('tr[data-i]'); if(t) show(+t.dataset.i);});
+$('rows').addEventListener('keydown',e=>{if(e.key==='Enter'){const t=e.target.closest('tr[data-i]'); if(t) show(+t.dataset.i);}});
+function copy(txt,btn){ (navigator.clipboard?.writeText(txt)||Promise.reject()).then(()=>btn.textContent='복사됨').catch(()=>{const r=document.createRange(); r.selectNodeContents(btn.previousSibling); getSelection().removeAllRanges(); getSelection().addRange(r);}); }
+function show(i){ cur=i; const r=DATA[i]; const nc=nextCoupon(r), cd=callDate(r);
+ const when = r.perp ? `만기가 없는 영구채입니다. 통상 발행 5년 뒤(${fmt(cd)} 무렵) 발행사가 콜로 상환하지만, 상환하지 않을 수도 있습니다.` :
+  `${d8(r.maturity)}에 원금을 받습니다. 오늘부터 ${left(r)} 남았습니다.` + (r.int_type==='이표채'&&nc?` 이자는 ${r.int_cycle}마다 지급되며 다음 지급일은 ${fmt(nc)}입니다.`:r.int_type==='복리채'?' 중간 이자 없이 만기에 원금과 이자를 한 번에 받습니다.':r.int_type==='할인채'?' 할인 발행이므로 만기에 액면 금액을 받습니다.':'');
+ $('detail').innerHTML=`<h3>${r.name}</h3><div class="sub">${r.issuer} · ${r.kind} · ${r.market}시장</div>
+ <div class="kv"><div>신용등급</div><div><span class="r">${r.rating}</span> <span class="tag">${r.rating_src==='공시'?'신용평가사 공시 등급':'발행사 등급 '+r.base_rating+'에서 '+(r.cls==='후순위채'?'1':'2')+'단계 낮춰 추정'}</span></div>
+ <div>세후 수익률</div><div class="mono"><b>${r.after_tax.toFixed(3)}%</b> <span class="tag">세전 ${r.ytm}% − 표면 ${r.coupon}% × 15.4%</span></div>
+ <div>체결가</div><div class="mono">액면 10,000원당 ${won(+r.price)}원 <span class="tag">${d8(r.trade_dt)} 종가</span></div>
+ <div>거래량</div><div class="mono">액면 ${won(r.volume)}원</div>
+ <div>발행·만기</div><div class="mono">${d8(r.issue_dt)} → ${r.perp?'영구':d8(r.maturity)}</div>
+ <div>이자 지급</div><div>${r.int_type||'-'}${r.int_type==='이표채'?' · '+r.int_cycle+'마다':''} · ${r.taxed}</div>
+ <div>순위·보증</div><div>${r.rank} · ${r.guarantee}</div>
+ <div>종목코드</div><div class="mono">${r.isin}<button class="copy" data-c="${r.isin}">복사</button><br>단축 ${r.srtn}<button class="copy" data-c="${r.srtn}">복사</button></div></div>
+ <div class="blk"><h4>원리금 수령 시기</h4>${when}</div>
+ ${hybrid(r)?`<div class="blk alert"><h4>유의 사항 · ${r.cls}</h4>원금 손실 흡수나 이자 미지급 조건이 붙을 수 있고, 실제 회수 시점은 만기보다 콜 시점(${fmt(cd)} 무렵)입니다. 발행사가 콜을 하지 않으면 보유 기간이 길어집니다. 투자설명서의 조건 확인이 필요합니다.</div>`:''}
+ <div class="blk"><h4>매수 방법</h4><ol><li>쓰고 있는 증권사 앱에서 국내채권 → 장내채권 메뉴로 이동합니다. 증권사는 어디든 같습니다.</li><li>종목코드 <span class="mono">${r.isin}</span>(또는 단축코드)로 검색합니다.</li><li>호가를 확인하고 매수 주문을 냅니다. 액면 1,000원 단위로 소액 매수가 가능합니다.</li></ol><span class="tag">장내 호가가 없으면 같은 종목을 증권사 장외채권 화면에서 찾을 수 있으나 가격이 다를 수 있습니다.</span></div>
+ <div class="blk links"><h4>참고 자료</h4><a href="https://seibro.or.kr/websquare/control.jsp?w2xPath=/IPORTAL/user/bond/BIP_CNTS03001V.xml" target="_blank" rel="noopener">세이브로 채권 상세</a><a href="https://dart.fss.or.kr/dsab007/main.do?option=corp&textCrpNm=${encodeURIComponent(r.issuer)}" target="_blank" rel="noopener">DART 발행사 공시</a></div>`;
+ $('detail').querySelectorAll('button.copy').forEach(b=>b.addEventListener('click',()=>copy(b.dataset.c,b)));
+ render(); if(window.innerWidth<920) $('detail').scrollIntoView({behavior:'smooth',block:'start'});
+}
+render();
+</script>
