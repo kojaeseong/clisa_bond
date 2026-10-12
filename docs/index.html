@@ -1,5 +1,15 @@
 <!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>우량채권 찾기</title>
+<meta name="description" content="예금보다 높은 이자, A등급 이상만. 거래소에서 오늘 살 수 있는 A등급 이상 채권을 세후 수익률로 모두 모았습니다.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="우량채권 찾기">
+<meta property="og:title" content="우량채권 찾기 — 예금보다 높은 이자, A등급 이상만.">
+<meta property="og:description" content="거래소에서 오늘 살 수 있는 A등급 이상 채권을 세후 수익률로 모두 모았습니다. 무료 · 가입 없음 · 매일 아침 갱신">
+<meta property="og:url" content="https://bond.clisa.ai/">
+<meta property="og:image" content="https://bond.clisa.ai/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
 :root{
@@ -118,7 +128,7 @@ button.copy:focus-visible,tbody tr:focus-visible,select:focus-visible,.hero .c:f
 </head><body>
 <div class="bar"><div class="in">
   <span class="name">우량채권 찾기</span><span class="date" id="basdt"></span><span class="btns"><a class="go" href="#tax">세금 계산 방법</a><a class="go" href="#caution">유의 사항</a><a class="go" href="#source">자료 출처</a></span>
-  <span class="what"><b>예금보다 높은 이자, A등급 이상만.</b> 거래소에서 오늘 살 수 있는 A등급 이상 채권을 세후 수익률로 모두 모았습니다. 어느 증권사 앱에서든 종목코드로 살 수 있는 채권만 실었습니다.</span>
+  <span class="what"><b>예금보다 높은 이자, A등급 이상만.</b> 거래소에서 오늘 살 수 있는 A등급 이상 채권을 세후 수익률로 모두 모았습니다. 어느 증권사 앱에서든 종목코드로 살 수 있는 채권만 담았습니다.</span>
 </div></div>
 <div class="wrap">
 
@@ -209,7 +219,7 @@ const pickRow=e=>{const t=e.target.closest('[data-i]'); if(t&&(e.type==='click'|
 function copy(txt,btn){ (navigator.clipboard?.writeText(txt)||Promise.reject()).then(()=>btn.textContent='복사됨').catch(()=>{const r=document.createRange(); r.selectNodeContents(btn.previousSibling); getSelection().removeAllRanges(); getSelection().addRange(r);}); }
 function calcOut(r){ const v=Math.max(0,+$('amt').value||0)*1e4; const y=r.perp?1:r.years; const g=v*r.after_tax/100*y; $('calcOut').textContent=manwon(g); $('calcLbl').textContent=r.perp?'1년마다 세후 이자 약':`${left(r)} 뒤 원금과 함께 받는 세후 이자 약`; }
 function show(i,scroll){ cur=i; const r=DATA[i]; const nc=nextCoupon(r), cd=callDate(r), lq=liq(r);
- const when = r.perp ? `만기가 없는 영구채입니다. 보통 발행 5년 뒤(${fmt(cd)} 무렵)에 발행사가 조기상환(콜)으로 원금을 돌려주지만, 돌려주지 않을 수도 있습니다.` :
+ const when = r.perp ? `만기가 없는 영구채입니다. 통상 발행 5년 뒤(${fmt(cd)} 무렵) 발행사가 콜로 상환하지만, 상환하지 않을 수도 있습니다.` :
   `${d8(r.maturity)}에 원금을 받습니다. 오늘부터 ${left(r)} 남았습니다.` + (r.int_type==='이표채'&&nc?` 이자는 ${r.int_cycle}마다 지급되며 다음 지급일은 ${fmt(nc)}입니다.`:r.int_type==='복리채'?' 중간 이자 없이 만기에 원금과 이자를 한 번에 받습니다.':r.int_type==='할인채'?' 할인 발행이므로 만기에 액면 금액을 받습니다.':'');
  $('detail').innerHTML=`<h3>${r.name}</h3><div class="sub">${r.issuer} · ${r.kind} · ${r.market}시장</div>
  <div class="kv"><div>신용등급</div><div>${chip(r)} <span class="tag">${r.rating_src==='공시'?'신용평가사 공시 등급':'발행사 등급 '+r.base_rating+'에서 '+(r.cls==='후순위채'?'1':'2')+'단계 낮춰 추정'}</span></div>
