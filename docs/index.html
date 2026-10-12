@@ -55,7 +55,7 @@ h2 small{font-weight:400;margin-left:8px}
 .ladder .s.none .v{color:var(--muted);font-size:14px;font-weight:400}
 @media (max-width:760px){.ladder{grid-template-columns:repeat(2,1fr);gap:10px 14px}.ladder .s:last-child{grid-column:span 2}}
 /* 조건 */
-.pick{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px 14px;padding:12px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.pick{display:grid;grid-template-columns:repeat(auto-fit,minmax(124px,1fr));gap:10px 14px;padding:12px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 .pick label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
 .pick select{font:inherit;font-size:14px;color:var(--fg);padding:7px 8px;border:1px solid var(--line);border-radius:3px;background:var(--bg)}
 .pick .more{display:contents}
@@ -88,7 +88,8 @@ tbody tr.on td:first-child{box-shadow:inset 3px 0 0 var(--green)}
 .yb{position:relative;display:inline-block;min-width:88px;text-align:right}
 .yb i{position:absolute;left:0;bottom:-3px;height:3px;background:var(--green);opacity:.55;border-radius:2px}
 .yb b{position:relative;font-weight:600}
-.detail{position:sticky;top:0;border-top:2px solid var(--fg);padding-top:10px}
+.detail{position:sticky;top:0;max-height:100vh;overflow-y:auto;border-top:2px solid var(--fg);padding-top:10px;padding-bottom:16px}
+.left{min-width:0}
 .detail h3{margin:0 0 2px;font-size:16px;line-height:1.35} .detail .sub{color:var(--muted);font-size:12px;margin-bottom:12px}
 .kv{display:grid;grid-template-columns:92px 1fr;gap:5px 10px;font-size:13px} .kv div:nth-child(odd){color:var(--muted)}
 .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
@@ -120,7 +121,7 @@ button.copy:focus-visible,tbody tr:focus-visible,select:focus-visible,.hero .c:f
   td.c7{display:block;grid-area:when;font-size:12px;color:var(--muted)}
   td.c7::before{content:"원금 "}
   td.c7 .lf{margin-left:6px}
-  .detail{position:static;order:-1;border-top:2px solid var(--green)}
+  .detail{position:static;max-height:none;overflow:visible;border-top:2px solid var(--green);margin-top:8px}
   tr.morerow{display:block;padding:10px 0} tr.morerow td{display:block;text-align:center}
 }
 .lf{display:none} @media (max-width:760px){.lf{display:inline}}
@@ -132,6 +133,8 @@ button.copy:focus-visible,tbody tr:focus-visible,select:focus-visible,.hero .c:f
 </div></div>
 <div class="wrap">
 
+<div class="split">
+  <div class="left">
 <h2>오늘의 요약<small>선순위 채권 중 최근 5영업일 거래대금 1천만 원 이상인 종목 기준 · '거래 활발'은 1억 원 이상</small></h2>
 <div class="hero" id="hero"></div>
 
@@ -151,11 +154,11 @@ button.copy:focus-visible,tbody tr:focus-visible,select:focus-visible,.hero .c:f
 </div>
 <div class="sum" id="sum"></div>
 
-<div class="split">
   <div class="tbl"><table>
     <thead><tr><th>등급</th><th>종목</th><th>종류</th><th class="n">세후 수익률</th><th class="n">세전</th><th class="n">표면금리</th><th>원금 받는 날</th><th class="n">남은 기간</th><th>이자 지급</th><th>거래</th></tr></thead>
     <tbody id="rows"></tbody>
   </table></div>
+  </div>
   <aside class="detail" id="detail"></aside>
 </div>
 
@@ -239,6 +242,6 @@ function show(i,scroll){ cur=i; const r=DATA[i]; const nc=nextCoupon(r), cd=call
  $('amt').addEventListener('input',()=>calcOut(r)); calcOut(r);
  render(); heroHtml(); if(scroll!==false&&window.innerWidth<920) $('detail').scrollIntoView({behavior:'smooth',block:'start'});
 }
-heroHtml(); const first=render(); if(first.length) show(first[0].i,false);
+heroHtml(); const first=render(); const h0=HERO.find(([,r])=>r); if(h0) show(h0[1].i,false); else if(first.length) show(first[0].i,false);
 </script>
 </body></html>
