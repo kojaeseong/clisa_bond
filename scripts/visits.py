@@ -1,21 +1,22 @@
 """Cloudflare Web Analytics → data/visits.csv (날짜·사이트별 조회수·방문수), data/referers.csv (유입 출처)
-토큰이 없거나 실패하면 기존 파일을 그대로 둔다 (exit 0)."""
+사이트 구분은 방문자가 연 주소(requestHost)로 한다. 실패하면 기존 파일을 그대로 둔다 (exit 0)."""
 import os, re, sys, json, csv, datetime as dt, urllib.request, urllib.error
 
 TOK = re.sub(r"\s+", "", os.environ.get("CF_ANALYTICS_TOKEN", ""))   # 붙여 넣을 때 섞인 줄바꿈·공백 제거
 ACC = "700aff14424b342ff0d7ccbd1743ca52"
-SITES = {  # Web Analytics 사이트 태그(측정 코드의 token) → 이름
-    "58e343ace23448bcb4d24c4bde3a2dd9": "clisa.ai",
-    "62257318a7f94d94b8fe70feffdce004": "korea.clisa.ai",
-    "67d6f341d17b4be0ba6c96a863294b4b": "bond.clisa.ai",
-}
 V, R = "data/visits.csv", "data/referers.csv"
 if not TOK:
     print("CF_ANALYTICS_TOKEN 없음 — 방문 기록 유지"); sys.exit(0)
 
-Q = """query($acc:string!,$since:Date!,$until:Date!,$tags:[string!]){ viewer{ accounts(filter:{accountTag:$acc}){
- daily: rumPageloadEventsAdaptiveGroups(limit:1000,filter:{date_geq:$since,date_leq:$until,siteTag_in:$tags}){ count sum{visits} dimensions{date siteTag} }
- ref: rumPageloadEventsAdaptiveGroups(limit:1000,filter:{date_geq:$since,date_leq:$until,siteTag_in:$tags}){ count dimensions{date siteTag refererHost} }
+def site_of(host):
+    h = (host or "").lower()
+    if h in ("clisa.ai", "www.clisa.ai", "geo.clisa.ai"): return "clisa.ai"
+    if h.endswith(".clisa.ai"): return h
+    return None   # 미리보기·기타 주소는 제외
+
+Q = """query($acc:string!,$since:Date!,$until:Date!){ viewer{ accounts(filter:{accountTag:$acc}){
+ daily: rumPageloadEventsAdaptiveGroups(limit:2000,filter:{date_geq:$since,date_leq:$until}){ count sum{visits} dimensions{date requestHost} }
+ ref: rumPageloadEventsAdaptiveGroups(limit:5000,filter:{date_geq:$since,date_leq:$until}){ count dimensions{date requestHost refererHost} }
 }}}"""
 
 def gql(v):
@@ -36,21 +37,26 @@ def load(path, key):
     return rows
 
 try:
-    # 어제까지(UTC 기준 일자; 한국 시간 아침 실행이면 전날 자료가 거의 다 들어옴). 처음이면 30일 소급.
     until = dt.date.today() - dt.timedelta(days=1)
-    since = until - dt.timedelta(days=30 if not os.path.exists(V) else 3)
-    d = gql(dict(acc=ACC, since=since.isoformat(), until=until.isoformat(), tags=list(SITES)))
     vis = load(V, ("date", "site")); ref = load(R, ("date", "site", "referer"))
+    since = until - dt.timedelta(days=3 if vis else 30)      # 처음이면 30일 소급
+    d = gql(dict(acc=ACC, since=since.isoformat(), until=until.isoformat()))
+    agg = {}
     for g in d["daily"]:
-        k = (g["dimensions"]["date"], SITES[g["dimensions"]["siteTag"]])
-        vis[k] = dict(date=k[0], site=k[1], pageviews=g["count"], visits=g["sum"]["visits"])
+        s = site_of(g["dimensions"]["requestHost"])
+        if not s: continue
+        k = (g["dimensions"]["date"], s); a = agg.setdefault(k, [0, 0]); a[0] += g["count"]; a[1] += g["sum"]["visits"]
+    for k, (p, v) in agg.items(): vis[k] = dict(date=k[0], site=k[1], pageviews=p, visits=v)
+    ragg = {}
     for g in d["ref"]:
-        k = (g["dimensions"]["date"], SITES[g["dimensions"]["siteTag"]], g["dimensions"]["refererHost"] or "(직접)")
-        ref[k] = dict(date=k[0], site=k[1], referer=k[2], pageviews=g["count"])
+        s = site_of(g["dimensions"]["requestHost"])
+        if not s: continue
+        k = (g["dimensions"]["date"], s, g["dimensions"]["refererHost"] or "(직접)"); ragg[k] = ragg.get(k, 0) + g["count"]
+    for k, p in ragg.items(): ref[k] = dict(date=k[0], site=k[1], referer=k[2], pageviews=p)
     for path, rows, cols in [(V, vis, ["date", "site", "pageviews", "visits"]), (R, ref, ["date", "site", "referer", "pageviews"])]:
         with open(path, "w", newline="", encoding="utf-8") as f:
             w = csv.DictWriter(f, fieldnames=cols); w.writeheader()
             for k in sorted(rows): w.writerow(rows[k])
-    print("방문 기록", len(vis), "행, 유입 출처", len(ref), "행 (", since, "~", until, ")")
+    print("방문 기록", len(vis), "행, 유입 출처", len(ref), "행 (", since, "~", until, ")", "원자료", len(d["daily"]), "묶음")
 except Exception as e:
     print("방문 기록 실패 — 기존 파일 유지:", e)
