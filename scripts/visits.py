@@ -14,9 +14,9 @@ def site_of(host):
     if h.endswith(".clisa.ai"): return h
     return None   # 미리보기·기타 주소는 제외
 
-Q = """query($acc:string!,$since:Date!,$until:Date!){ viewer{ accounts(filter:{accountTag:$acc}){
- daily: rumPageloadEventsAdaptiveGroups(limit:2000,filter:{date_geq:$since,date_leq:$until}){ count sum{visits} dimensions{date requestHost} }
- ref: rumPageloadEventsAdaptiveGroups(limit:5000,filter:{date_geq:$since,date_leq:$until}){ count dimensions{date requestHost refererHost} }
+Q = """query($acc:string!,$day:Date!){ viewer{ accounts(filter:{accountTag:$acc}){
+ daily: rumPageloadEventsAdaptiveGroups(limit:500,filter:{date:$day}){ count sum{visits} dimensions{date requestHost} }
+ ref: rumPageloadEventsAdaptiveGroups(limit:2000,filter:{date:$day}){ count dimensions{date requestHost refererHost} }
 }}}"""
 
 def gql(v):
@@ -40,23 +40,26 @@ try:
     until = dt.date.today() - dt.timedelta(days=1)
     vis = load(V, ("date", "site")); ref = load(R, ("date", "site", "referer"))
     since = until - dt.timedelta(days=3 if vis else 30)      # 처음이면 30일 소급
-    d = gql(dict(acc=ACC, since=since.isoformat(), until=until.isoformat()))
-    agg = {}
-    for g in d["daily"]:
-        s = site_of(g["dimensions"]["requestHost"])
-        if not s: continue
-        k = (g["dimensions"]["date"], s); a = agg.setdefault(k, [0, 0]); a[0] += g["count"]; a[1] += g["sum"]["visits"]
+    # 하루씩 따로 묻는다 — 기간을 길게 잡으면 Cloudflare가 표본 추정치(10 단위)로 답해 작은 사이트가 사라진다
+    agg, ragg, n = {}, {}, 0
+    day = since
+    while day <= until:
+        d = gql(dict(acc=ACC, day=day.isoformat())); n += len(d["daily"])
+        for g in d["daily"]:
+            site = site_of(g["dimensions"]["requestHost"])
+            if not site: continue
+            k = (g["dimensions"]["date"], site); a = agg.setdefault(k, [0, 0]); a[0] += g["count"]; a[1] += g["sum"]["visits"]
+        for g in d["ref"]:
+            site = site_of(g["dimensions"]["requestHost"])
+            if not site: continue
+            k = (g["dimensions"]["date"], site, g["dimensions"]["refererHost"] or "(직접)"); ragg[k] = ragg.get(k, 0) + g["count"]
+        day += dt.timedelta(days=1)
     for k, (p, v) in agg.items(): vis[k] = dict(date=k[0], site=k[1], pageviews=p, visits=v)
-    ragg = {}
-    for g in d["ref"]:
-        s = site_of(g["dimensions"]["requestHost"])
-        if not s: continue
-        k = (g["dimensions"]["date"], s, g["dimensions"]["refererHost"] or "(직접)"); ragg[k] = ragg.get(k, 0) + g["count"]
     for k, p in ragg.items(): ref[k] = dict(date=k[0], site=k[1], referer=k[2], pageviews=p)
     for path, rows, cols in [(V, vis, ["date", "site", "pageviews", "visits"]), (R, ref, ["date", "site", "referer", "pageviews"])]:
         with open(path, "w", newline="", encoding="utf-8") as f:
             w = csv.DictWriter(f, fieldnames=cols); w.writeheader()
             for k in sorted(rows): w.writerow(rows[k])
-    print("방문 기록", len(vis), "행, 유입 출처", len(ref), "행 (", since, "~", until, ")", "원자료", len(d["daily"]), "묶음")
+    print("방문 기록", len(vis), "행, 유입 출처", len(ref), "행 (", since, "~", until, ")", "원자료", n, "묶음")
 except Exception as e:
     print("방문 기록 실패 — 기존 파일 유지:", e)
