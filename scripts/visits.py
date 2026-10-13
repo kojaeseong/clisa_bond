@@ -1,8 +1,8 @@
 """Cloudflare Web Analytics → data/visits.csv (날짜·사이트별 조회수·방문수), data/referers.csv (유입 출처)
 토큰이 없거나 실패하면 기존 파일을 그대로 둔다 (exit 0)."""
-import os, sys, json, csv, datetime as dt, urllib.request
+import os, re, sys, json, csv, datetime as dt, urllib.request
 
-TOK = os.environ.get("CF_ANALYTICS_TOKEN", "").strip()
+TOK = re.sub(r"\s+", "", os.environ.get("CF_ANALYTICS_TOKEN", ""))   # 붙여 넣을 때 섞인 줄바꿈·공백 제거
 ACC = "700aff14424b342ff0d7ccbd1743ca52"
 SITES = {  # Web Analytics 사이트 태그(측정 코드의 token) → 이름
     "58e343ace23448bcb4d24c4bde3a2dd9": "clisa.ai",
