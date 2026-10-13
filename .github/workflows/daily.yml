@@ -6,6 +6,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: write
+concurrency: daily-update      # 두 실행이 겹치지 않게
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -24,4 +25,5 @@ jobs:
           git config user.email "clisageo@clisa.ai"
           git add docs data/missing_issuers.txt; git add data/visits.csv data/referers.csv 2>/dev/null || true
           git diff --cached --quiet || git commit -m "자료 갱신 $(date -u +%Y-%m-%d)"
+          git pull --rebase -X theirs origin main   # 실행 중 다른 push가 있었으면 그 위에 얹음
           git push
