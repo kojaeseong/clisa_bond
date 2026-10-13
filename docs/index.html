@@ -112,7 +112,7 @@ button.close{display:none;font:inherit;font-size:13px;padding:4px 10px;border:1p
 .quick button.on{background:var(--green);border-color:var(--green);color:#fff}
 .calcbox .total{font-family:var(--mono);font-size:30px;font-weight:600;color:var(--green);line-height:1.2}
 .calcbox .lbl{font-size:13px;margin:2px 0 6px}
-.act{margin:0 0 4px} button.share{font:inherit;font-size:13px;padding:6px 12px;border:1px solid var(--fg);border-radius:4px;background:var(--bg);color:var(--fg);cursor:pointer}
+.act{margin:12px 0 8px} button.share{font:inherit;font-size:13px;padding:6px 12px;border:1px solid var(--fg);border-radius:4px;background:var(--bg);color:var(--fg);cursor:pointer}
 .shade{display:none}
 .pick label .row{display:flex;gap:4px} .pick input[type=month]{font:inherit;font-size:14px;color:var(--fg);padding:6px 8px;border:1px solid var(--line);border-radius:3px;background:var(--bg);flex:1;min-width:0}
 .pick button.x{font:inherit;font-size:16px;line-height:1;padding:0 9px;border:1px solid var(--line);border-radius:3px;background:var(--bg);color:var(--muted);cursor:pointer}
@@ -121,6 +121,7 @@ button.copy{font:inherit;font-size:11px;padding:1px 7px;border:1px solid var(--l
 button.copy:focus-visible,tbody tr:focus-visible,select:focus-visible,.hero .c:focus-visible{outline:2px solid var(--green);outline-offset:1px}
 .note{margin-top:26px;border-top:1px solid var(--line);padding-top:12px;font-size:12px;color:var(--muted);line-height:1.7;max-width:90ch}
 .note a{color:var(--green);text-decoration:none} .note a:hover{text-decoration:underline}
+.note p.copy{margin:14px 0 0;padding-top:10px;border-top:1px solid var(--line)}
 .note h4{margin:8px 0 2px;font-size:12px;color:var(--fg);scroll-margin-top:12px}
 .empty{color:var(--muted);font-size:13px}
 /* 휴대전화: 표를 카드로 */
@@ -158,25 +159,24 @@ button.copy:focus-visible,tbody tr:focus-visible,select:focus-visible,.hero .c:f
 <h2>오늘의 요약<small>선순위 채권 중 최근 5영업일 거래대금 1천만 원 이상인 종목 기준 · '거래 활발'은 1억 원 이상</small></h2>
 <div class="hero" id="hero"></div>
 
-<h2>원금 받는 시기별 최고 세후 수익률<small>신용등급 A 이상 선순위 채권 · 아래 줄은 같은 기간 정기예금 최고 · 누르면 상세 정보가 열립니다</small></h2>
+<h2>원리금 받는 시기별 최고 세후 수익률<small>신용등급 A 이상 선순위 채권 · 아래 줄은 같은 기간 정기예금 최고 · 누르면 상세 정보가 열립니다</small></h2>
 <div class="ladder" id="ladder"></div>
 
 <div class="pick" id="pick">
   <label>신용등급 <select id="fR"><option value="1">AAA 이상</option><option value="3">AA 이상 (AA- 포함)</option><option value="7" selected>A 이상 (A- 포함)</option><option value="99">전체</option></select></label>
-  <label>세후 수익률 <select id="fY"><option value="0">전체</option><option value="3" selected>3% 이상</option><option value="4">4% 이상</option><option value="5">5% 이상</option></select></label>
-  <label class="mdate">원금 받아야 하는 날 <span class="row"><input type="month" id="fM"><button type="button" class="x" id="fMx" title="지우기">×</button></span></label>
+  <label>세후 수익률 <select id="fY"><option value="0">전체</option><option value="3">3% 이상</option><option value="4" selected>4% 이상</option><option value="5">5% 이상</option></select></label>
+  <label class="mdate">돈 돌려받아야 하는 날 <span class="row"><input type="month" id="fM"><button type="button" class="x" id="fMx" title="지우기">×</button></span></label>
   <button class="tog" id="tog" type="button">조건 더 보기</button>
   <div class="more">
   <label>종류 <select id="fC"><option value="senior" selected>채권(선순위)+예금</option><option value="bond">채권만 (선순위)</option><option value="dep">예금만</option><option value="">전체 (후순위·신종 포함)</option><option>국채</option><option>지방채</option><option>특수채</option><option>금융채</option><option>일반회사채</option><option>후순위채</option><option>신종·조건부자본증권</option></select></label>
   <label>남은 기간 <select id="fT"><option value="">전체</option><option value="1">1년 이내</option><option value="3">3년 이내</option><option value="5">5년 이내</option><option value="10">10년 이내</option><option value="fixed">만기 있는 것만</option></select></label>
-  <label>거래일 <select id="fD"><option value="1">최근 거래일만</option><option value="5" selected>최근 5영업일</option></select></label>
   <label>정렬 <select id="fS"><option value="grade" selected>등급 높은 순 → 세후 높은 순</option><option value="after_tax">세후 수익률 높은 순</option><option value="ytm">세전 수익률 높은 순</option><option value="years">남은 기간 짧은 순</option><option value="amt">거래대금 많은 순</option></select></label>
   </div>
 </div>
 <div class="sum" id="sum"></div>
 
   <div class="tbl"><table>
-    <thead><tr><th>등급</th><th>종목</th><th>종류</th><th class="n">세후 수익률</th><th class="n">세전</th><th class="n">표면금리</th><th>원금 받는 날</th><th class="n">남은 기간</th><th>이자 지급</th><th>거래</th></tr></thead>
+    <thead><tr><th>등급</th><th>종목</th><th>종류</th><th class="n">세후 수익률</th><th class="n">세전</th><th class="n">표면금리</th><th>원리금 받는 날</th><th class="n">남은 기간</th><th>이자 지급</th><th>거래</th></tr></thead>
     <tbody id="rows"></tbody>
   </table></div>
   </div>
@@ -190,13 +190,14 @@ button.copy:focus-visible,tbody tr:focus-visible,select:focus-visible,.hero .c:f
   <h4 id="caution">유의 사항</h4>
   채권은 예금자 보호 대상이 아니며, 발행사가 부도나면 원금을 잃을 수 있습니다. 만기 전에 팔면 그때의 시장 가격에 따라 손실이 날 수 있고, 장내 거래량이 적은 종목은 원하는 때에 팔지 못할 수 있습니다. 후순위채와 신종·조건부자본증권(표에서 보라색 점선으로 표시)은 발행사의 재무 상태가 나빠지면 이자가 지급되지 않거나 원금이 줄어드는 조건이 붙어 있고, 만기보다 발행사의 조기상환(콜) 시점이 실제 회수 시점이 되는 경우가 많습니다. 이런 종목은 매수 전에 투자설명서의 조건을 읽어야 합니다. 이 표의 수익률은 거래된 날의 종가 기준이며 지금 호가와 다를 수 있습니다. 거래가 아주 적은 날의 체결가는 시세와 동떨어질 수 있으므로, 거래대금이 적은 종목은 상세의 '거래' 표시를 확인하십시오.
   <h4 id="deposit">정기예금</h4>
-  정기예금은 금융감독원 '금융상품 한눈에'의 은행·저축은행 공시 자료입니다. 은행은 매달 공시하므로 사이트의 예금 금리는 공시월 기준이며, 은행 앱에서 며칠만 하는 특판은 들어 있지 않습니다. 표의 세후 수익률은 우대 조건 없이 받는 기본 금리에서 이자소득세 15.4%를 뺀 값이고, 우대 금리는 상세에 조건과 함께 적었습니다. 기간(6·12·24·36개월)별로 은행 6곳, 저축은행 10곳의 가장 높은 상품만 실었으며 '원금 받는 날'은 오늘 가입했을 때의 만기일입니다. 예금은 예금자보호법에 따라 금융회사마다 1억 원(원금+이자)까지 보호됩니다. 회전식 예금은 표시된 금리가 첫 회전 기간에만 적용됩니다.
+  정기예금은 금융감독원 '금융상품 한눈에'의 은행·저축은행 공시 자료입니다. 은행은 매달 공시하므로 사이트의 예금 금리는 공시월 기준이며, 은행 앱에서 며칠만 하는 특판은 들어 있지 않습니다. 표의 세후 수익률은 우대 조건 없이 받는 기본 금리에서 이자소득세 15.4%를 뺀 값이고, 우대 금리는 상세에 조건과 함께 적었습니다. 기간(6·12·24·36개월)별로 은행 6곳, 저축은행 10곳의 가장 높은 상품만 실었으며 '원리금 받는 날'은 오늘 가입했을 때의 만기일입니다. 예금은 예금자보호법에 따라 금융회사마다 1억 원(원금+이자)까지 보호됩니다. 회전식 예금은 표시된 금리가 첫 회전 기간에만 적용됩니다.
   <h4 id="rating">신용등급</h4>
   신용등급은 한국신용평가·한국기업평가·NICE신용평가의 공시 등급(2026년 10월 12일 확인)입니다. 국채·지방채·공공기관채는 국가 신용에 따릅니다. 후순위채와 신종·조건부자본증권은 평가사가 매긴 발행물 등급을 썼고, 발행물 등급이 공시되지 않은 종목은 발행사 등급보다 각각 1단계·2단계 낮춰 추정해 표시했습니다(종목 상세에 '추정'으로 표시). 등급표는 매달 평가사 공시와 다시 맞추며, 종목의 정확한 등급은 각 신용평가사 공시에서 확인할 수 있습니다.
   <h4 id="source">자료 출처</h4>
-  금융위원회 채권시세정보·채권기본정보(공공데이터포털, 공공누리 제4유형: 출처 표시·비영리·변경 금지), 금융감독원 금융상품 한눈에 정기예금 공시. 종목명·가격·수익률·만기·표면금리는 원자료 그대로이며, 세후 수익률·남은 기간·등급 보정·투자 금액별 이자는 클리사 계산입니다. 이 페이지는 정보 제공이며 투자 권유가 아닙니다. 광고나 수수료를 받지 않습니다.
+  금융위원회 채권시세정보·채권기본정보(공공데이터포털, 공공누리 제4유형: 출처 표시·비영리·변경 금지), 금융감독원 금융상품 한눈에 정기예금 공시. 종목명·가격·수익률·만기·표면금리는 원자료 그대로이며, 세후 수익률·남은 기간·등급 보정·받는 돈 계산은 클리사 계산입니다. 이 페이지는 정보 제공이며 투자 권유가 아닙니다. 광고나 수수료를 받지 않습니다.
   <h4 id="contact">문의</h4>
   <a href="mailto:bond@clisa.ai">bond@clisa.ai</a>
+  <p class="copy">© 2026 클리사(Clisa). 원자료는 각 기관의 이용 조건을 따르며, 세후 수익률·등급 보정·화면 구성은 클리사가 만들었습니다. 출처를 밝히면 자유롭게 인용할 수 있습니다.</p>
 </div>
 </div>
 <script>(function(){var v=new Date().toISOString().slice(0,10);document.write('<script src="data.js?v='+v+'"><\/script><script src="deposits.js?v='+v+'"><\/script>');})();</script>
@@ -227,29 +228,29 @@ const HERO=[['AAA·국채 중 세후 수익률 최고',best(POOL.filter(r=>gi(r)
 const BUCKETS=[['1년 이내',0,1],['1~2년',1,2],['2~3년',2,3],['3~5년',3,5],['5년 초과',5,99]];
 const LAD=BUCKETS.map(([b,lo,hi])=>[b,best(POOL.filter(r=>r.years>lo&&r.years<=hi)),best(DEPALL.filter(r=>r.years>lo&&r.years<=hi))]);
 function heroHtml(){
- $('hero').innerHTML=HERO.map(([l,r])=>r?`<div class="c ${r.i===cur?'on':''}" data-i="${r.i}" tabindex="0"><div class="l">${l}</div><div class="v">${r.after_tax.toFixed(2)}<small>%</small></div><div class="n">${chip(r)} ${r.name}</div><div class="m">원금 ${d8(r.maturity)} · ${left(r)} 남음 · 세전 ${r.ytm.toFixed(2)}%</div></div>`:`<div class="c"><div class="l">${l}</div><div class="v" style="color:var(--muted);font-size:16px">해당 종목 없음</div></div>`).join('');
+ $('hero').innerHTML=HERO.map(([l,r])=>r?`<div class="c ${r.i===cur?'on':''}" data-i="${r.i}" tabindex="0"><div class="l">${l}</div><div class="v">${r.after_tax.toFixed(2)}<small>%</small></div><div class="n">${chip(r)} ${r.name}</div><div class="m">원리금 ${d8(r.maturity)} · ${left(r)} 남음 · 세전 ${r.ytm.toFixed(2)}%</div></div>`:`<div class="c"><div class="l">${l}</div><div class="v" style="color:var(--muted);font-size:16px">해당 종목 없음</div></div>`).join('');
  const top=Math.max(...LAD.map(([,r])=>r?r.after_tax:0));
  $('ladder').innerHTML=LAD.map(([b,r,d])=>(r?`<div class="s ${r.after_tax===top?'best':''} ${r.i===cur?'on':''}"><div class="b">${b}</div><div class="v" data-i="${r.i}" tabindex="0">${r.after_tax.toFixed(2)}%</div><div class="n" data-i="${r.i}">${chip(r)}${r.name}</div>`:`<div class="s none"><div class="b">${b}</div><div class="v">해당 없음</div>`)+(d?`<div class="dep ${d.i===cur?'on':''}" data-i="${d.i}" tabindex="0">예금 최고 <b>${d.after_tax.toFixed(2)}%</b> · ${d.issuer}</div>`:`<div class="dep none">예금 해당 없음</div>`)+`</div>`).join('');
 }
 function monthEnd(v){ if(!v) return ''; const [y,m]=v.split('-').map(Number); const d=new Date(y,m,0); return `${y}${String(m).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`; }
-function render(){ const R=+$('fR').value,Y=+$('fY').value,T=$('fT').value,Cc=$('fC').value,S=$('fS').value,Dd=$('fD').value,M=monthEnd($('fM').value);
+function render(){ const R=+$('fR').value,Y=+$('fY').value,T=$('fT').value,Cc=$('fC').value,S=$('fS').value,Dd='5',M=monthEnd($('fM').value);
  let rows=ALL.filter(r=>(r.dep||Dd==='5'||r.trade_dt===BASDT)&&gi(r)<=R&&r.after_tax>=Y&&(Cc==='senior'?!hybrid(r):Cc==='bond'?(!hybrid(r)&&!r.dep):Cc==='dep'?r.dep:(!Cc||r.cls===Cc))&&(!T||(T==='fixed'?!r.perp:(!r.perp&&r.years<=+T)))&&(!M||(!r.perp&&r.maturity<=M)));
  rows.sort((a,b)=>S==='grade'?(gi(a)-gi(b))||(b.after_tax-a.after_tax):S==='years'?(a.perp?99:a.years)-(b.perp?99:b.years):b[S]-a[S]);
  const hy=rows.filter(hybrid).length, mx=Math.max(...rows.map(r=>r.after_tax),1);
  $('sum').innerHTML=`<span>조건에 맞는 종목 <b>${rows.length}</b></span><span>${Dd==='5'?'최근 5영업일 거래 종목':'최근 거래일 거래 종목'} <b>${Dd==='5'?DATA.length:DATA.filter(r=>r.trade_dt===BASDT).length}</b></span><span>국고채 2~4년 세전 <b>${KTB.toFixed(2)}%</b></span>`+(DEPALL.length?`<span>정기예금 <b>${DEPALL.length}</b> (${(typeof DEP_MONTH==='undefined'?'':DEP_MONTH.slice(0,4)+'년 '+(+DEP_MONTH.slice(4))+'월')} 공시)</span>`:'')+(hy?`<span>이 중 후순위·신종 <b>${hy}</b> (유의 사항 확인)</span>`:'');
  const shown=rows.length>lim+15?rows.slice(0,lim):rows;
- $('rows').innerHTML=rows.length?shown.map(r=>`<tr data-i="${r.i}" tabindex="0" class="${r.i===cur?'on':''}"><td class="c1">${chip(r)}</td><td class="c2">${r.name}</td><td class="c3"><span class="tag ${hybrid(r)?'alert':''}">${r.cls}</span></td><td class="n c4"><span class="yb"><i style="width:${(r.after_tax/mx*100).toFixed(0)}%"></i><b>${r.after_tax.toFixed(2)}%</b></span></td><td class="n c5">${r.ytm.toFixed(2)}%</td><td class="n c6">${r.coupon.toFixed(2)}%</td><td class="c7">${r.perp?'영구(콜)':d8(r.maturity)}<span class="lf">· ${left(r)}</span></td><td class="n c8">${left(r)}</td><td class="c9">${r.dep?'만기에 · '+r.int_type:r.int_type==='이표채'?r.int_cycle+'마다':r.int_type||'-'}</td><td class="c10"><span class="tag">${liq(r)[0]}</span></td></tr>`).join('')+(shown.length<rows.length?`<tr class="morerow"><td colspan="10"><button class="copy" id="more" type="button">나머지 ${rows.length-shown.length}개 보기</button></td></tr>`:''):`<tr><td colspan="10" class="empty">조건에 맞는 종목이 없습니다. 등급이나 수익률 조건을 넓혀 보십시오.</td></tr>`;
+ $('rows').innerHTML=rows.length?shown.map(r=>`<tr data-i="${r.i}" tabindex="0" class="${r.i===cur?'on':''}"><td class="c1">${chip(r)}</td><td class="c2">${r.name}</td><td class="c3"><span class="tag ${hybrid(r)?'alert':''}">${r.cls}</span></td><td class="n c4"><span class="yb"><i style="width:${(r.after_tax/mx*100).toFixed(0)}%"></i><b>${r.after_tax.toFixed(2)}%</b></span></td><td class="n c5">${r.ytm.toFixed(2)}%</td><td class="n c6">${r.coupon.toFixed(2)}%</td><td class="c7">${r.perp?'영구(콜)':d8(r.maturity)}<span class="lf">· ${left(r)}</span></td><td class="n c8">${left(r)}</td><td class="c9">${r.dep?'만기에 · '+r.int_type:r.int_type==='이표채'?r.int_cycle+'마다':r.int_type||'-'}</td><td class="c10"><span class="tag">${liq(r)[0]}</span></td></tr>`).join('')+(shown.length<rows.length?`<tr class="morerow"><td colspan="10"><button class="copy" id="more" type="button">나머지 ${rows.length-shown.length}개 보기</button></td></tr>`:''):`<tr><td colspan="10" class="empty">조건에 맞는 종목이 없습니다. 등급·수익률 조건을 넓히거나 '돈 돌려받아야 하는 날'을 늦춰 보십시오.</td></tr>`;
  const mb=$('more'); if(mb) mb.addEventListener('click',e=>{e.stopPropagation(); lim=1e9; render();});
  return rows;
 }
-['fR','fY','fT','fC','fS','fD','fM'].forEach(id=>$(id).addEventListener('change',()=>{lim=40;render();}));
+['fR','fY','fT','fC','fS','fM'].forEach(id=>$(id).addEventListener('change',()=>{lim=40;render();}));
 $('fMx').addEventListener('click',()=>{$('fM').value='';lim=40;render();});
 $('tog').addEventListener('click',()=>{const o=$('pick').classList.toggle('open'); $('tog').textContent=o?'조건 접기':'조건 더 보기';});
 const pickRow=e=>{const t=e.target.closest('[data-i]'); if(t&&(e.type==='click'||e.key==='Enter')) show(+t.dataset.i);};
 ['rows','hero','ladder'].forEach(id=>{$(id).addEventListener('click',pickRow);$(id).addEventListener('keydown',pickRow);});
 function copy(txt,btn){ (navigator.clipboard?.writeText(txt)||Promise.reject()).then(()=>btn.textContent='복사됨').catch(()=>{const r=document.createRange(); r.selectNodeContents(btn.previousSibling); getSelection().removeAllRanges(); getSelection().addRange(r);}); }
 function calcOut(r){ const v=Math.max(0,+$('amt').value||0)*1e4; const y=r.perp?1:r.years; const g=v*r.after_tax/100*y; if(r.perp){ $('calcTotal').textContent=manwon(g); $('calcLbl').textContent='1년마다 받는 세후 이자 (원금은 콜 때 돌려받음)'; } else { $('calcTotal').textContent=manwon(v+g); $('calcLbl').textContent=`${d8(r.maturity)}까지 받는 돈 · 원금 ${manwon(v)} + 세후 이자 ${manwon(g)}`; } document.querySelectorAll('.quick button').forEach(b=>b.classList.toggle('on',+b.dataset.v===+$('amt').value)); }
-function shareText(r){ return r.dep?`${r.name} · 정기예금 ${r.d.term}개월 · 세후 ${r.after_tax.toFixed(2)}% — 우량채권 찾기 https://bond.clisa.ai/#${r.isin}`:`${r.name} · ${r.rating} · 세후 ${r.after_tax.toFixed(2)}% · ${r.perp?'영구(콜)':d8(r.maturity)+' 원금'} — 우량채권 찾기 https://bond.clisa.ai/#${r.isin}`; }
+function shareText(r){ return r.dep?`${r.name} · 정기예금 ${r.d.term}개월 · 세후 ${r.after_tax.toFixed(2)}% — 우량채권 찾기 https://bond.clisa.ai/#${r.isin}`:`${r.name} · ${r.rating} · 세후 ${r.after_tax.toFixed(2)}% · ${r.perp?'영구(콜)':d8(r.maturity)+' 원리금'} — 우량채권 찾기 https://bond.clisa.ai/#${r.isin}`; }
 function share(r,btn){ const t=shareText(r); if(navigator.share){ navigator.share({text:t}).catch(()=>{}); } else copy(t,btn); }
 function closeSheet(){ $('detail').classList.remove('open'); $('shade').classList.remove('open'); }
 function wire(r,scroll){ $('detail').querySelectorAll('button.copy').forEach(b=>b.addEventListener('click',()=>copy(b.dataset.c,b)));
@@ -274,7 +275,7 @@ function showDep(r,scroll){ const d=r.d, lq=liq(r);
  wire(r,scroll); }
 function show(i,scroll){ cur=i; const r=DATA2[i]; history.replaceState(null,'','#'+r.isin); if(r.dep) return showDep(r,scroll); const nc=nextCoupon(r), cd=callDate(r), lq=liq(r);
  const when = r.perp ? `만기가 없는 영구채입니다. 통상 발행 5년 뒤(${fmt(cd)} 무렵) 발행사가 콜로 상환하지만, 상환하지 않을 수도 있습니다.` :
-  `${d8(r.maturity)}에 원금을 받습니다. 오늘부터 ${left(r)} 남았습니다.` + (r.int_type==='이표채'&&nc?` 이자는 ${r.int_cycle}마다 지급되며 다음 지급일은 ${fmt(nc)}입니다.`:r.int_type==='복리채'?' 중간 이자 없이 만기에 원금과 이자를 한 번에 받습니다.':r.int_type==='할인채'?' 할인 발행이므로 만기에 액면 금액을 받습니다.':'');
+  `${d8(r.maturity)}에 원리금을 받습니다. 오늘부터 ${left(r)} 남았습니다.` + (r.int_type==='이표채'&&nc?` 이자는 ${r.int_cycle}마다 지급되며 다음 지급일은 ${fmt(nc)}입니다.`:r.int_type==='복리채'?' 중간 이자 없이 만기에 원금과 이자를 한 번에 받습니다.':r.int_type==='할인채'?' 할인 발행이므로 만기에 액면 금액을 받습니다.':'');
  $('detail').innerHTML=`<div class="dhead"><h3>${r.name}</h3><button type="button" class="close" id="close">닫기</button></div><div class="sub">${r.issuer} · ${r.kind} · ${r.market}시장</div>
  <div class="calcbox"><div class="calc"><input id="amt" type="number" inputmode="numeric" min="0" step="100" value="1000"><span class="unit">만 원을 지금 사면</span></div><div class="quick"><button type="button" data-v="500">500만</button><button type="button" data-v="1000">1,000만</button><button type="button" data-v="3000">3,000만</button><button type="button" data-v="5000">5,000만</button><button type="button" data-v="10000">1억</button></div><div class="total" id="calcTotal"></div><div class="lbl" id="calcLbl"></div><div class="tag">세후 수익률 × 남은 기간의 단리 근사입니다. 매수 가격과 이자 지급 시기에 따라 실제 수령액은 다릅니다.</div></div>
  <div class="act"><button type="button" class="share" id="share">이 채권 공유</button></div>
