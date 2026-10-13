@@ -1,7 +1,8 @@
 name: daily-update
 on:
   schedule:
-    - cron: "40 23 * * 0-4"   # 평일 08:40 KST (전날 거래분)
+    - cron: "40 0,5 * * 1-5"   # 평일 09:40·14:40 KST (전날 거래분이 늦게 올라와도 받도록 두 번)
+    - cron: "40 0 * * 6"       # 토요일 09:40 KST (금요일 거래분)
   workflow_dispatch:
 permissions:
   contents: write
@@ -15,6 +16,9 @@ jobs:
       - run: python scripts/daily.py
         env:
           DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+      - run: python scripts/deposits.py
+        env:
+          FSS_KEY: ${{ secrets.FSS_KEY }}
       - run: |
           git config user.name "clisa-bot"
           git config user.email "clisageo@clisa.ai"
