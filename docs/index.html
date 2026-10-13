@@ -138,8 +138,8 @@ button.copy:focus-visible,tbody tr:focus-visible,select:focus-visible,.hero .c:f
   td.c7{display:block;grid-area:when;font-size:12px;color:var(--muted)}
   td.c7::before{content:"원금 "}
   td.c7 .lf{margin-left:6px}
-  .detail{position:fixed;left:0;right:0;bottom:0;z-index:20;max-height:88vh;overflow-y:auto;background:var(--bg);border-top:3px solid var(--green);border-radius:12px 12px 0 0;padding:12px 16px 24px;transform:translateY(105%);transition:transform .22s ease;box-shadow:0 -6px 24px rgba(0,0,0,.18)}
-  .detail.open{transform:translateY(0)}
+  .detail{position:fixed;left:0;right:0;bottom:0;z-index:20;max-height:88vh;max-height:88dvh;overflow-y:auto;background:var(--bg);border-top:3px solid var(--green);border-radius:12px 12px 0 0;padding:12px 16px 24px;transform:translateY(110%);visibility:hidden;pointer-events:none;transition:transform .22s ease,visibility 0s linear .22s;box-shadow:0 -6px 24px rgba(0,0,0,.18)}
+  .detail.open{transform:translateY(0);visibility:visible;pointer-events:auto;transition:transform .22s ease,visibility 0s}
   .shade{display:block;position:fixed;inset:0;z-index:19;background:rgba(0,0,0,.35);opacity:0;pointer-events:none;transition:opacity .2s}
   .shade.open{opacity:1;pointer-events:auto}
   button.close{display:inline-block}
