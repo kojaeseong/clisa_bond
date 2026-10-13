@@ -1,6 +1,6 @@
 """Cloudflare Web Analytics → data/visits.csv (날짜·사이트별 조회수·방문수), data/referers.csv (유입 출처)
 토큰이 없거나 실패하면 기존 파일을 그대로 둔다 (exit 0)."""
-import os, re, sys, json, csv, datetime as dt, urllib.request
+import os, re, sys, json, csv, datetime as dt, urllib.request, urllib.error
 
 TOK = re.sub(r"\s+", "", os.environ.get("CF_ANALYTICS_TOKEN", ""))   # 붙여 넣을 때 섞인 줄바꿈·공백 제거
 ACC = "700aff14424b342ff0d7ccbd1743ca52"
@@ -13,7 +13,7 @@ V, R = "data/visits.csv", "data/referers.csv"
 if not TOK:
     print("CF_ANALYTICS_TOKEN 없음 — 방문 기록 유지"); sys.exit(0)
 
-Q = """query($acc:String!,$since:Date!,$until:Date!,$tags:[String!]){ viewer{ accounts(filter:{accountTag:$acc}){
+Q = """query($acc:string!,$since:Date!,$until:Date!,$tags:[string!]){ viewer{ accounts(filter:{accountTag:$acc}){
  daily: rumPageloadEventsAdaptiveGroups(limit:1000,filter:{date_geq:$since,date_leq:$until,siteTag_in:$tags}){ count sum{visits} dimensions{date siteTag} }
  ref: rumPageloadEventsAdaptiveGroups(limit:1000,filter:{date_geq:$since,date_leq:$until,siteTag_in:$tags}){ count dimensions{date siteTag refererHost} }
 }}}"""
@@ -21,7 +21,10 @@ Q = """query($acc:String!,$since:Date!,$until:Date!,$tags:[String!]){ viewer{ ac
 def gql(v):
     req = urllib.request.Request("https://api.cloudflare.com/client/v4/graphql", data=json.dumps({"query": Q, "variables": v}).encode(),
                                  headers={"Authorization": "Bearer " + TOK, "Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=60) as r: j = json.load(r)
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r: j = json.load(r)
+    except urllib.error.HTTPError as e:
+        raise RuntimeError(f"HTTP {e.code}: {e.read().decode('utf-8','replace')[:600]}")
     if j.get("errors"): raise RuntimeError(j["errors"])
     return j["data"]["viewer"]["accounts"][0]
 
