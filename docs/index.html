@@ -138,9 +138,14 @@ button.copy:focus-visible,tbody tr:focus-visible,select:focus-visible,.hero .c:f
   td.c7 .lf{margin-left:6px}
   .detail{position:fixed;left:0;right:0;bottom:0;z-index:20;max-height:88vh;max-height:88dvh;overflow-y:auto;background:var(--bg);border-top:3px solid var(--green);border-radius:12px 12px 0 0;padding:12px 16px 24px;transform:translateY(110%);visibility:hidden;pointer-events:none;transition:transform .22s ease,visibility 0s linear .22s;box-shadow:0 -6px 24px rgba(0,0,0,.18)}
   .detail.open{transform:translateY(0);visibility:visible;pointer-events:auto;transition:transform .22s ease,visibility 0s}
+  .detail{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+  body.sheet{overflow:hidden;position:fixed;left:0;right:0;width:100%}
   .shade{display:block;position:fixed;inset:0;z-index:19;background:rgba(0,0,0,.35);opacity:0;pointer-events:none;transition:opacity .2s}
   .shade.open{opacity:1;pointer-events:auto}
-  button.close{display:inline-block}
+  .dhead{position:sticky;top:-12px;z-index:2;margin:-12px -16px 8px;padding:14px 16px 8px;background:var(--bg);border-bottom:1px solid var(--line);align-items:center}
+  .dhead::before{content:"";position:absolute;top:5px;left:50%;width:36px;height:4px;margin-left:-18px;border-radius:2px;background:var(--line)}
+  .dhead h3{margin:6px 0 0}
+  button.close{display:inline-block;flex:none;margin-top:6px;font-size:14px;padding:7px 14px;border-color:var(--fg);font-weight:500}
   tr.morerow{display:block;padding:10px 0} tr.morerow td{display:block;text-align:center}
 }
 .lf{display:none} @media (max-width:760px){.lf{display:inline}}
@@ -242,15 +247,20 @@ $('fMx').addEventListener('click',()=>{$('fM').value='';lim=40;render();});
 $('tog').addEventListener('click',()=>{const o=$('pick').classList.toggle('open'); $('tog').textContent=o?'조건 접기':'조건 더 보기';});
 const pickRow=e=>{const t=e.target.closest('[data-i]'); if(t&&(e.type==='click'||e.key==='Enter')) show(+t.dataset.i);};
 ['rows','hero','ladder'].forEach(id=>{$(id).addEventListener('click',pickRow);$(id).addEventListener('keydown',pickRow);});
-function copy(txt,btn){ (navigator.clipboard?.writeText(txt)||Promise.reject()).then(()=>btn.textContent='복사됨').catch(()=>{const r=document.createRange(); r.selectNodeContents(btn.previousSibling); getSelection().removeAllRanges(); getSelection().addRange(r);}); }
+function copyText(txt){ return (navigator.clipboard?.writeText(txt)||Promise.reject()).catch(()=>{ const ta=document.createElement('textarea'); ta.value=txt; ta.setAttribute('readonly',''); ta.style.cssText='position:fixed;top:0;left:0;opacity:0'; document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0,txt.length); const ok=document.execCommand('copy'); ta.remove(); if(!ok) throw 0; }); }
+function flash(btn,msg){ const t=btn.dataset.t||(btn.dataset.t=btn.textContent); btn.textContent=msg; clearTimeout(btn._f); btn._f=setTimeout(()=>btn.textContent=t,2200); }
+function copy(txt,btn){ copyText(txt).then(()=>flash(btn,'복사됨')).catch(()=>flash(btn,'복사 실패 — 길게 눌러 복사')); }
 function calcOut(r){ const v=Math.max(0,+$('amt').value||0)*1e4; const y=r.perp?1:r.years; const g=v*r.after_tax/100*y; if(r.perp){ $('calcTotal').textContent=manwon(g); $('calcLbl').textContent='1년마다 받는 세후 이자 (원금은 콜 때 돌려받음)'; } else { $('calcTotal').textContent=manwon(v+g); $('calcLbl').textContent=`${d8(r.maturity)}까지 받는 돈 · 원금 ${manwon(v)} + 세후 이자 ${manwon(g)}`; } document.querySelectorAll('.quick button').forEach(b=>b.classList.toggle('on',+b.dataset.v===+$('amt').value)); }
 function shareText(r){ return `${r.name} · ${r.rating} · 세후 ${r.after_tax.toFixed(2)}% · ${r.perp?'영구(콜)':d8(r.maturity)+' 원리금'} — 우량채권 찾기 https://bond.clisa.ai/#${r.isin}`; }
-function share(r,btn){ const t=shareText(r); if(navigator.share){ navigator.share({text:t}).catch(()=>{}); } else copy(t,btn); }
-function closeSheet(){ $('detail').classList.remove('open'); $('shade').classList.remove('open'); }
+function share(r,btn){ const t=shareText(r), url='https://bond.clisa.ai/#'+r.isin, mobile=matchMedia('(pointer:coarse)').matches&&window.innerWidth<=760;
+ if(mobile&&navigator.share){ navigator.share({title:'우량채권 찾기',text:t.replace(' '+url,''),url}).then(()=>flash(btn,'공유됨')).catch(e=>{ if(e&&e.name==='AbortError') return; copyText(t).then(()=>flash(btn,'복사됨 — 카톡 등에 붙여 넣으세요')).catch(()=>flash(btn,'복사 실패')); }); }
+ else copyText(t).then(()=>flash(btn,'복사됨 — 카톡·메일에 붙여 넣으세요')).catch(()=>flash(btn,'복사 실패')); }
+let sheetY=0; function openSheet(){ sheetY=window.scrollY; document.body.style.top=(-sheetY)+'px'; document.body.classList.add('sheet'); $('detail').classList.add('open'); $('shade').classList.add('open'); $('detail').scrollTop=0; }
+function closeSheet(){ $('detail').classList.remove('open'); $('shade').classList.remove('open'); if(document.body.classList.contains('sheet')){ document.body.classList.remove('sheet'); document.body.style.top=''; window.scrollTo(0,sheetY); } }
 function wire(r,scroll){ $('detail').querySelectorAll('button.copy').forEach(b=>b.addEventListener('click',()=>copy(b.dataset.c,b)));
  $('amt').addEventListener('input',()=>calcOut(r)); document.querySelectorAll('.quick button').forEach(b=>b.addEventListener('click',()=>{$('amt').value=b.dataset.v; calcOut(r);})); calcOut(r);
  $('share').addEventListener('click',()=>share(r,$('share'))); $('close').addEventListener('click',closeSheet);
- render(); heroHtml(); if(scroll!==false&&window.innerWidth<=760){ $('detail').classList.add('open'); $('shade').classList.add('open'); $('detail').scrollTop=0; } }
+ render(); heroHtml(); if(scroll!==false&&window.innerWidth<=760) openSheet(); }
 function show(i,scroll){ cur=i; const r=DATA[i]; history.replaceState(null,'','#'+r.isin); const nc=nextCoupon(r), cd=callDate(r), lq=liq(r);
  const when = r.perp ? `만기가 없는 영구채입니다. 통상 발행 5년 뒤(${fmt(cd)} 무렵) 발행사가 콜로 상환하지만, 상환하지 않을 수도 있습니다.` :
   `${d8(r.maturity)}에 원리금을 받습니다. 오늘부터 ${left(r)} 남았습니다.` + (r.int_type==='이표채'&&nc?` 이자는 ${r.int_cycle}마다 지급되며 다음 지급일은 ${fmt(nc)}입니다.`:r.int_type==='복리채'?' 중간 이자 없이 만기에 원금과 이자를 한 번에 받습니다.':r.int_type==='할인채'?' 할인 발행이므로 만기에 액면 금액을 받습니다.':'');
@@ -272,6 +282,10 @@ function show(i,scroll){ cur=i; const r=DATA[i]; history.replaceState(null,'','#
  wire(r,scroll);
 }
 $('shade').addEventListener('click',closeSheet);
+$('shade').addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
+(()=>{ const d=$('detail'); let y0=0; d.addEventListener('touchstart',e=>{y0=e.touches[0].clientY;},{passive:true});
+ d.addEventListener('touchmove',e=>{ if(!d.classList.contains('open')) return; const dy=e.touches[0].clientY-y0, top=d.scrollTop<=0, bot=d.scrollTop+d.clientHeight>=d.scrollHeight-1;
+  if((top&&dy>0)||(bot&&dy<0)||d.scrollHeight<=d.clientHeight) e.preventDefault(); },{passive:false}); })();
 heroHtml(); const first=render(); const hash=location.hash.slice(1); const hi=hash?DATA.findIndex(r=>r.isin===hash):-1; const h0=HERO.find(([,r])=>r); if(hi>=0) show(hi); else if(h0) show(h0[1].i,false); else if(first.length) show(first[0].i,false);
 </script>
 </body></html>
