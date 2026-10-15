@@ -50,7 +50,12 @@ while len(days) < 5 and (today - d).days < 15:
     d -= dt.timedelta(days=1)
 if not days: raise SystemExit("최근 15일 안에 거래 자료가 없습니다.")
 D = days[0][0]
-basic = fetch(BASIC, D); print("기본정보", len(basic), "건", flush=True)
+# 기본정보는 시세보다 늦게 올라오는 날이 있다. 기준일 것이 비어 있으면 그 전 거래일 것을 쓴다(종목 속성은 날마다 거의 같다).
+basic = []
+for s, _ in days:
+    basic = fetch(BASIC, s); print("기본정보", s, len(basic), "건", flush=True)
+    if basic: break
+if not basic: raise SystemExit("기본정보가 비어 있습니다 — 기존 자료 유지")
 
 # 2) 합치기 (최근 거래 우선)
 P, seen = [], set()
@@ -88,6 +93,7 @@ for x in basic:
         volume=int(p["trqu"] or 0), amt=int(p["trPrc"] or 0), market=p["mrktCtg"], taxed=x["txtnDcdNm"], issue_dt=x["bondIssuDt"],
         int_type=x["bondIntTcdNm"], int_cycle=x["intPayCyclCtt"], guarantee=x["grnDcdNm"], rank=x["bondRnknDcdNm"], trade_dt=p["basDt"]))
 out.sort(key=lambda r: -r["after_tax"])
+if len(out) < 50: raise SystemExit(f"종목이 {len(out)}개뿐입니다 — 자료 이상으로 보고 기존 자료 유지")
 ktb_l = [r["ytm"] for r in out if r["rating"] == "국채" and r["years"] and 2 <= r["years"] <= 4]
 ktb = round(statistics.median(ktb_l), 3) if ktb_l else None
 missing = sorted({x["bondIsurNm"] for x in basic if x["isinCd"] in pm and x["bondIsurNm"] not in R and x["bondOffrMcdNm"] == "공모"})

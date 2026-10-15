@@ -17,13 +17,16 @@ jobs:
       - run: python scripts/daily.py
         env:
           DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
-      - run: python scripts/deposits.py
+      - run: python scripts/deposits.py   # 채권 단계가 실패해도 돌린다
+        if: always()
         env:
           FSS_KEY: ${{ secrets.FSS_KEY }}
       - run: python scripts/visits.py
+        if: always()
         env:
           CF_ANALYTICS_TOKEN: ${{ secrets.CF_ANALYTICS_TOKEN }}
-      - run: |
+      - if: always()
+        run: |
           git config user.name "clisa-bot"
           git config user.email "clisageo@clisa.ai"
           git add docs data/missing_issuers.txt; git add data/visits.csv data/referers.csv 2>/dev/null || true
