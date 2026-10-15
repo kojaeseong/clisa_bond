@@ -288,4 +288,5 @@ $('shade').addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
   if((top&&dy>0)||(bot&&dy<0)||d.scrollHeight<=d.clientHeight) e.preventDefault(); },{passive:false}); })();
 heroHtml(); const first=render(); const hash=location.hash.slice(1); const hi=hash?DATA.findIndex(r=>r.isin===hash):-1; const h0=HERO.find(([,r])=>r); if(hi>=0) show(hi); else if(h0) show(h0[1].i,false); else if(first.length) show(first[0].i,false);
 </script>
+<!-- Cloudflare Web Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "67d6f341d17b4be0ba6c96a863294b4b"}'></script><!-- End Cloudflare Web Analytics -->
 </body></html>
