@@ -2,3 +2,4 @@
 .env
 data/price_*.json
 data/basic_*.json
+__pycache__/
