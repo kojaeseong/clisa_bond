@@ -211,7 +211,7 @@ const $=id=>document.getElementById(id); let cur=-1, lim=40;
 const ALL=DEP.map((r,i)=>({...r,i}));
 const best=a=>a.length?a.reduce((m,r)=>r.rate>m.rate||(r.rate===m.rate&&r.rate2>m.rate2)?r:m):null;
 const OPEN=ALL.filter(r=>r.deny==='1');
-const HERO=[['은행 정기예금 1년 · 세전 최고',best(OPEN.filter(r=>!saving(r)&&r.grp==='은행'&&r.term===12))],['저축은행 정기예금 1년 · 세전 최고',best(OPEN.filter(r=>!saving(r)&&r.grp==='저축은행'&&r.term===12))],['적금 1년 · 세전 최고 (누구나 가입)',best(OPEN.filter(r=>saving(r)&&r.term===12))]];
+const HERO=[['저축은행 정기예금 1년 · 세전 최고',best(OPEN.filter(r=>!saving(r)&&r.grp==='저축은행'&&r.term===12))],['은행 정기예금 1년 · 세전 최고',best(OPEN.filter(r=>!saving(r)&&r.grp==='은행'&&r.term===12))],['적금 1년 · 세전 최고 (누구나 가입)',best(OPEN.filter(r=>saving(r)&&r.term===12))]];
 const LAD=[1,3,6,12,24,36].map(t=>[t,best(OPEN.filter(r=>!saving(r)&&r.term===t))]);
 function heroHtml(){
  $('hero').innerHTML=HERO.map(([l,r])=>r?`<div class="c ${r.i===cur?'on':''}" data-i="${r.i}" tabindex="0"><div class="l">${l}</div><div class="v">${r.rate.toFixed(2)}<small>% 세전</small></div><div class="n">${chip(r)} ${r.bank} ${r.name}</div><div class="m">세후 ${r.after_tax.toFixed(2)}%${r.rate2>r.rate?` · 우대 최고 ${r.rate2.toFixed(2)}%`:''} · ${online(r)?'앱 가입':'영업점'}</div></div>`:`<div class="c"><div class="l">${l}</div><div class="v" style="color:var(--muted);font-size:16px">해당 상품 없음</div></div>`).join('');
