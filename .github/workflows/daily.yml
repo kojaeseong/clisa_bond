@@ -17,6 +17,9 @@ jobs:
       - run: python scripts/daily.py
         env:
           DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+      - run: python scripts/deposits.py
+        env:
+          FSS_KEY: ${{ secrets.FSS_KEY }}
       - run: python scripts/visits.py
         env:
           CF_ANALYTICS_TOKEN: ${{ secrets.CF_ANALYTICS_TOKEN }}
