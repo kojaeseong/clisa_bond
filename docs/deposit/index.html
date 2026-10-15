@@ -105,7 +105,7 @@ button.close{display:none;font:inherit;font-size:13px;padding:4px 10px;border:1p
 .quick button{font:inherit;font-size:12px;padding:3px 9px;border:1px solid var(--green3);border-radius:14px;background:var(--bg);color:var(--fg);cursor:pointer}
 .quick button.on{background:var(--green);border-color:var(--green);color:#fff}
 .calcbox .total{font-family:var(--mono);font-size:30px;font-weight:600;color:var(--green);line-height:1.2}
-.calcbox .lbl{font-size:13px;margin:2px 0 6px}
+.calcbox .lbl{font-size:13px;margin:2px 0 2px} .calcbox .eq{font-size:12px;color:var(--muted);margin:0 0 6px}
 .calcbox .warn{font-size:12px;color:var(--alert);font-weight:500;margin-top:4px}
 .act{margin:12px 0 8px} button.share{font:inherit;font-size:13px;padding:6px 12px;border:1px solid var(--fg);border-radius:4px;background:var(--bg);color:var(--fg);cursor:pointer}
 .shade{display:none}
@@ -237,7 +237,7 @@ function flash(btn,msg){ const t=btn.dataset.t||(btn.dataset.t=btn.textContent);
 function calcOut(r){ const v=Math.max(0,+$('amt').value||0)*1e4, n=r.term;
  // 단리. 적금은 매달 v씩 넣으므로 k번째 돈에는 (n-k+1)개월치 이자: 합계 v×r/12×n(n+1)/2
  const pre=saving(r)?v*r.rate/100/12*n*(n+1)/2:v*r.rate/100*n/12, post=pre*(1-0.154), prin=saving(r)?v*n:v;
- $('calcTotal').textContent=manwon(prin+post); $('calcLbl').textContent=`${d8(r.maturity)}에 받는 돈 · 원금 ${manwon(prin)} + 세후 이자 ${manwon(post)} (세전 이자 ${manwon(pre)})`;
+ $('calcTotal').textContent=manwon(prin+post); $('calcLbl').textContent=`${d8(r.maturity)}에 받는 돈 · 원금 ${manwon(prin)} + 세후 이자 ${manwon(post)}`; $('calcEq').textContent=`세전 이자 ${manwon(pre)} − 세금 ${manwon(pre-post)} (15.4%) = 세후 이자 ${manwon(post)}`;
  $('calcWarn').textContent=prin+post>1e8?`원금과 이자를 합해 1억 원이 넘습니다. 넘는 ${manwon(prin+post-1e8)}은 예금자 보호를 받지 못하므로 다른 금융회사에 나누어 넣으십시오.`:(r.limit&&(saving(r)?v:prin)>r.limit?`이 상품의 가입 한도(${limitTxt(r)})를 넘습니다.`:'');
  document.querySelectorAll('.quick button').forEach(b=>b.classList.toggle('on',+b.dataset.v===+$('amt').value)); }
 function shareText(r){ return `${r.bank} ${r.name} · ${term(r)} · 세전 ${r.rate.toFixed(2)}% (세후 ${r.after_tax.toFixed(2)}%) — 예금·적금 금리 찾기 https://bond.clisa.ai/deposit/#${r.id}`; }
@@ -252,7 +252,7 @@ function wire(r,scroll){ $('amt').addEventListener('input',()=>calcOut(r)); docu
 function show(i,scroll){ cur=i; const r=ALL[i]; history.replaceState(null,'','#'+r.id); const sv=saving(r);
  const quick=sv?[[10,'10만'],[30,'30만'],[50,'50만'],[100,'100만'],[300,'300만']]:[[500,'500만'],[1000,'1,000만'],[3000,'3,000만'],[5000,'5,000만'],[10000,'1억']];
  $('detail').innerHTML=`<div class="dhead"><h3>${r.bank} ${r.name}</h3><button type="button" class="close" id="close">닫기</button></div><div class="sub">${r.grp} · ${kindTxt(r)} · ${term(r)}</div>
- <div class="calcbox"><div class="calc"><input id="amt" type="number" inputmode="numeric" min="0" step="10" value="${sv?50:1000}"><span class="unit">만 원을 ${sv?'매달 넣으면':'지금 넣으면'}</span></div><div class="quick">${quick.map(([v,l])=>`<button type="button" data-v="${v}">${l}</button>`).join('')}</div><div class="total" id="calcTotal"></div><div class="lbl" id="calcLbl"></div><div class="warn" id="calcWarn"></div><div class="tag">세전 기본금리 × 기간의 단리 계산입니다. 우대 조건을 채우면 더 받고, 복리 상품은 조금 더 받습니다.</div></div>
+ <div class="calcbox"><div class="calc"><input id="amt" type="number" inputmode="numeric" min="0" step="10" value="${sv?50:1000}"><span class="unit">만 원을 ${sv?'매달 넣으면':'지금 넣으면'}</span></div><div class="quick">${quick.map(([v,l])=>`<button type="button" data-v="${v}">${l}</button>`).join('')}</div><div class="total" id="calcTotal"></div><div class="lbl" id="calcLbl"></div><div class="eq mono" id="calcEq"></div><div class="warn" id="calcWarn"></div><div class="tag">세전 기본금리 × 기간의 단리 계산입니다. 우대 조건을 채우면 더 받고, 복리 상품은 조금 더 받습니다.</div></div>
  <div class="act"><button type="button" class="share" id="share">이 상품 공유</button></div>
  <div class="kv"><div>세전 금리</div><div class="mono"><b>${r.rate.toFixed(2)}%</b> <span class="tag">기본금리 · 우대 조건 없이 받는 금리</span></div>
  <div>세후 금리</div><div class="mono"><b>${r.after_tax.toFixed(3)}%</b> <span class="tag">세전 ${r.rate.toFixed(2)}% × (1 − 15.4%)</span></div>
